@@ -1,0 +1,86 @@
+import { useState } from 'react';
+import { APP_NAME } from '../config'
+import Link from 'next/link';
+import { signout, isAuth } from '../actions/auth';
+import Router from 'next/router';
+import Nprogress from 'nprogress';
+
+
+import {
+  Collapse,
+  Navbar,
+  NavbarToggler,
+  Nav,
+  NavItem,
+  NavLink,
+} from 'reactstrap';
+
+Router.onRouteChangeStart = url => Nprogress.start();
+Router.onRouteChangeComplete = url => Nprogress.done();
+Router.onRouteChangeErr = url => Nprogress.done();
+
+
+const Header = (props) => {
+  const [isOpen, setIsOpen] = useState(true);
+
+  const toggle = () => setIsOpen(!isOpen);
+
+  return (
+    <div>
+      <Navbar color="light" light expand="md">
+        <Link href="/">
+          <NavLink className="font-weight-bold">{APP_NAME}</NavLink>
+        </Link>
+        <NavbarToggler onClick={toggle} />
+        <Collapse isOpen={isOpen} navbar>
+          <Nav className="ml-auto" navbar>
+            {!isAuth() && (
+              <React.Fragment>
+                <NavItem>
+                  <Link href="/signup">
+                    <NavLink style={{ cursor: 'pointer' }}>Signup</NavLink>
+                  </Link>
+                </NavItem>
+                <NavItem>
+                  <Link href="/signin">
+                    <NavLink style={{ cursor: 'pointer' }}>Signin</NavLink>
+                  </Link>
+                </NavItem>
+              </React.Fragment>
+            )}
+              <React.Fragment>
+                <NavItem>
+                  <Link href="/admin/blogs">
+                    <NavLink style={{ cursor: 'pointer' }}>Blogs</NavLink>
+                  </Link>
+                </NavItem>
+              </React.Fragment>
+            {isAuth() && (
+              <NavItem>
+                <NavLink style={{ cursor: 'pointer' }} onClick={() => signout(() => {
+                  Router.replace('/signin')
+                })}>Signout</NavLink>
+              </NavItem>
+            )}
+            {isAuth() && isAuth().role === 0 && (
+              <NavItem>
+                <Link href="/user">
+                  <NavLink style={{ cursor: 'pointer' }}>{`${isAuth().name}'s Dashboard`}</NavLink>
+                </Link>
+              </NavItem>
+            )}
+            {isAuth() && isAuth().role === 1 && (
+              <NavItem>
+                <Link href="/admin">
+                  <NavLink style={{ cursor: 'pointer' }}>{`${isAuth().name}'s Dashboard`}</NavLink>
+                </Link>
+              </NavItem>
+            )}
+          </Nav>
+        </Collapse>
+      </Navbar>
+    </div>
+  );
+}
+
+export default Header;
